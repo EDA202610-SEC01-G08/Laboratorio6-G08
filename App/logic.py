@@ -32,8 +32,7 @@ import tracemalloc
 
 from DataStructures.Map import map_linear_probing as lp
 from DataStructures.List import array_list as al
-
-# TODO Realice la importación del mapa separate chaining
+from DataStructures.Map import map_separate_chaining as sc
 
 
 data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/GoodReads/'
@@ -209,8 +208,12 @@ def add_book_author_and_year(catalog, author_name, book):
             al.add_last(books, book)
             pub_year_map = lp.new_map(1000,0.7)
             lp.put(pub_year_map,pub_year,book)
-    else:
-        pass # TODO Completar escenario donde no se había agregado el autor al mapa principal
+    else:   
+        books = al.new_list()
+        al.add_last(books, book)
+        pub_year_map = lp.new_map(1000,0.7)
+        lp.put(pub_year_map,pub_year,books)
+        lp.put(books_by_year_author,author_name,pub_year_map)
     return catalog
 
 
@@ -237,7 +240,9 @@ def add_book_tag(catalog, book_tag):
         book_tag_list = lp.get(catalog['book_tags'],t['tag_id'])
         al.add_last(book_tag_list,book_tag)
     else:
-        pass #TODO Completar escenario donde el book_tag no se había agregado al mapa   
+        book_tag_list = al.new_list()
+        al.add_last(book_tag_list,book_tag)
+        lp.put(catalog['book_tags'],t['tag_id'],book_tag_list)
     return catalog
 
 #  -------------------------------------------------------------
@@ -248,7 +253,6 @@ def get_book_info_by_book_id(catalog, good_reads_book_id):
     """
     Retorna toda la informacion que se tenga almacenada de un libro según su good_reads_id.
     """
-    #TODO Completar función de consulta
     pass
 
 
