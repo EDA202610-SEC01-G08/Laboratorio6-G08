@@ -1,7 +1,7 @@
 import random
 from DataStructures.List import array_list as al
-import map_entry as me
-import map_functions as mf
+from DataStructures.Map import map_entry as me
+from DataStructures.Map import map_functions as mf
 
 
 def new_map(num_elements, load_factor, prime=109345121):
@@ -34,9 +34,9 @@ def put(my_map, key, value):
     hash = mf.hash_value(my_map, key)
     slot = find_slot(my_map, key, hash)
     if slot[0]:  # Si la llave ya existe, actualizamos su valor
-        my_map["table"] = al.insert_element(my_map["table"], me.set_value(al.get_element(my_map["table"], slot[1]), value), slot[1])
+        my_map["table"] = al.insert_element(my_map["table"], me.set_value(al.get_element(my_map["table"], slot[1] + 1), value), slot[1] + 1)
     else:  # Si la llave no existe, la agregamos al mapa
-        my_map["table"] = al.insert_element(my_map["table"], me.new_map_entry(key, value), slot[1])
+        my_map["table"] = al.insert_element(my_map["table"], me.new_map_entry(key, value), slot[1] + 1)
         my_map["size"] += 1
         my_map["current_factor"] = my_map["size"] / my_map["capacity"]
         if my_map["current_factor"] > my_map["limit_factor"]:
@@ -49,14 +49,14 @@ def find_slot(my_map, key, hash_value):
     """
     for i in range(my_map["capacity"]):
         pos = (hash_value + i) % my_map["capacity"]
-        if is_availible(my_map["table"], pos):
+        if is_available(my_map["table"], pos):
             return (False, pos)
-        elif me.get_key(al.get_element(my_map["table"], pos)) == key:
+        elif me.get_key(al.get_element(my_map["table"], pos + 1)) == key:
             return (True, pos)
     return (False, -1)  # Si no se encuentra un slot disponible después de recorrer toda la tabla
 
-def is_availible(table, pos):
-    return me.get_key(al.get_element(table, pos)) is None or me.get_key(al.get_element(table, pos)) == "__EMPTY__"
+def is_available(table, pos):
+    return me.get_key(al.get_element(table, pos + 1)) is None or me.get_key(al.get_element(table, pos + 1)) == "__EMPTY__"
 
 def rehash(my_map):
     """
@@ -72,8 +72,17 @@ def rehash(my_map):
     my_map["size"] = 0
     for i in range(al.size(old_table)):
         entry = al.get_element(old_table, i + 1)
-        if me.get_key(entry) is not None:
-            put(my_map, me.get_key(entry), me.get_value(entry))
+        if me.get_key(entry) is not None and me.get_key(entry) != "__EMPTY__":
+            # Reinserting directly into the new table
+            hash_value = mf.hash_value(my_map, me.get_key(entry))
+            for j in range(my_map["capacity"]):
+                pos = (hash_value + j) % my_map["capacity"]
+                if is_available(my_map["table"], pos):
+                    # Adjusting for 1-based indexing
+                    my_map["table"] = al.insert_element(my_map["table"], me.new_map_entry(me.get_key(entry), me.get_value(entry)), pos + 1)
+                    my_map["size"] += 1
+                    break
+    return my_map
 
 def default_compare(key, entry):
     if key == me.get_key(entry):
@@ -99,9 +108,9 @@ def remove(my_map, key):
     hash = mf.hash_value(my_map, key)
     slot = find_slot(my_map, key, hash)
     if slot[0]:  # Si la llave existe, la eliminamos
-        removed_entry = al.get_element(my_map["table"], slot[1])
-        my_map["table"] = al.insert_element(my_map["table"], me.set_key(al.get_element(my_map["table"], slot[1]), "__EMPTY__"), slot[1])
-        my_map["table"] = al.insert_element(my_map["table"], me.set_value(al.get_element(my_map["table"], slot[1]), "__EMPTY__"), slot[1])
+        removed_entry = al.get_element(my_map["table"], slot[1] + 1)
+        my_map["table"] = al.insert_element(my_map["table"], me.set_key(al.get_element(my_map["table"], slot[1] + 1), "__EMPTY__"), slot[1] + 1)
+        my_map["table"] = al.insert_element(my_map["table"], me.set_value(al.get_element(my_map["table"], slot[1] + 1), "__EMPTY__"), slot[1] + 1)
         my_map["size"] -= 1
         my_map["current_factor"] = my_map["size"] / my_map["capacity"]
     return my_map
@@ -113,7 +122,7 @@ def get(my_map, key):
     hash = mf.hash_value(my_map, key)
     slot = find_slot(my_map, key, hash)
     if slot[0]:  # Si la llave existe, retornamos su valor
-        return me.get_value(al.get_element(my_map["table"], slot[1]))
+        return me.get_value(al.get_element(my_map["table"], slot[1] + 1))
     else:  # Si la llave no existe, retornamos None
         return None
     
