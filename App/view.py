@@ -27,8 +27,9 @@
 import sys
 import App.logic as logic
 # TODO Realice la importación del mapa linear probing
+from DataStructures import map as mp
 # TODO Realice la importación de ArrayList como estructura de datos auxiliar para sus requerimientos
-
+from DataStructures import arraylist as al
 
 """
 La vista se encarga de la interacción con el usuario
@@ -52,7 +53,9 @@ def load_data(control):
     """
     Solicita a la controlador que cargue los datos
     """
-    books, authors, tags, book_tags = logic.load_data(control)
+    delta_time, delta_memory, (books, authors, tags, book_tags) = logic.load_data(control)
+    print(f"Tiempo de carga: {delta_time:.2f} ms")
+    print(f"Memoria utilizada: {delta_memory:.2f} kB")
     return books, authors, tags, book_tags
 
 #  -------------------------------------------------------------
