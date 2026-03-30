@@ -12,7 +12,7 @@ def new_map(num_elements, load_factor, prime=109345121):
     las entradas que colisionan en ese índice.
     La capacidad inicial es el primo siguiente a num_elements / load_factor.
     """
-    capacity = mf.next_prime(int(num_elements / load_factor) + 1)
+    capacity = mf.next_prime(int(num_elements / load_factor))
 
     my_table = {
         'prime': prime,
@@ -194,22 +194,32 @@ def rehash(my_map):
     """
     Crea una nueva tabla con capacidad = primo siguiente al doble de la actual
     y reinsertan todos los elementos existentes.
+    Actualiza el mapa en su lugar para reflejar los cambios.
     """
+    old_table = my_map['table']
+    old_capacity = my_map['capacity']
+    
     new_capacity = mf.next_prime(my_map['capacity'] * 2 + 1)
-    new_table = new_map(
-        int(new_capacity * my_map['limit_factor']),
-        my_map['limit_factor'],
-        my_map['prime']
-    )
-
-    # Reinsertar todos los elementos de cada cadena
-    capacity = my_map['capacity']
-    for i in range(capacity):
-        chain = lt.get_element(my_map['table'], i)
+    
+    # Crear nueva tabla vacía con la nueva capacidad
+    new_table = lt.new_list()
+    for _ in range(new_capacity):
+        chain = slt.new_list()
+        lt.add_last(new_table, chain)
+    
+    # Actualizar propiedades del mapa
+    my_map['capacity'] = new_capacity
+    my_map['table'] = new_table
+    my_map['size'] = 0
+    my_map['current_factor'] = 0
+    
+    # Reinsertar todos los elementos de cada cadena de la tabla vieja
+    for i in range(old_capacity):
+        chain = lt.get_element(old_table, i + 1)
         current = chain['first']
         while current is not None:
             entry = current['info']
-            put(new_table, me.get_key(entry), me.get_value(entry))
+            put(my_map, me.get_key(entry), me.get_value(entry))
             current = current['next']
-
-    return new_table
+    
+    return my_map
