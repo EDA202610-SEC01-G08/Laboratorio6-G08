@@ -34,9 +34,9 @@ def put(my_map, key, value):
     hash = mf.hash_value(my_map, key)
     slot = find_slot(my_map, key, hash)
     if slot[0]:  # Si la llave ya existe, actualizamos su valor
-        my_map["table"] = al.insert_element(my_map["table"], me.set_value(al.get_element(my_map["table"], slot[1] + 1), value), slot[1] + 1)
+        my_map["table"] = al.change_info(my_map["table"], slot[1] + 1, me.set_value(al.get_element(my_map["table"], slot[1] + 1), value))
     else:  # Si la llave no existe, la agregamos al mapa
-        my_map["table"] = al.insert_element(my_map["table"], me.new_map_entry(key, value), slot[1] + 1)
+        my_map["table"] = al.change_info(my_map["table"], slot[1] + 1, me.new_map_entry(key, value))
         my_map["size"] += 1
         my_map["current_factor"] = my_map["size"] / my_map["capacity"]
         if my_map["current_factor"] > my_map["limit_factor"]:
@@ -79,7 +79,7 @@ def rehash(my_map):
                 pos = (hash_value + j) % my_map["capacity"]
                 if is_available(my_map["table"], pos):
                     # Adjusting for 1-based indexing
-                    my_map["table"] = al.insert_element(my_map["table"], me.new_map_entry(me.get_key(entry), me.get_value(entry)), pos + 1)
+                    my_map["table"] = al.change_info(my_map["table"], pos + 1, me.new_map_entry(me.get_key(entry), me.get_value(entry)))
                     my_map["size"] += 1
                     break
     return my_map
@@ -109,8 +109,8 @@ def remove(my_map, key):
     slot = find_slot(my_map, key, hash)
     if slot[0]:  # Si la llave existe, la eliminamos
         removed_entry = al.get_element(my_map["table"], slot[1] + 1)
-        my_map["table"] = al.insert_element(my_map["table"], me.set_key(al.get_element(my_map["table"], slot[1] + 1), "__EMPTY__"), slot[1] + 1)
-        my_map["table"] = al.insert_element(my_map["table"], me.set_value(al.get_element(my_map["table"], slot[1] + 1), "__EMPTY__"), slot[1] + 1)
+        my_map["table"] = al.change_info(my_map["table"], slot[1] + 1, me.set_key(al.get_element(my_map["table"], slot[1] + 1), "__EMPTY__"))
+        my_map["table"] = al.change_info(my_map["table"], slot[1] + 1, me.set_value(al.get_element(my_map["table"], slot[1] + 1), "__EMPTY__"))
         my_map["size"] -= 1
         my_map["current_factor"] = my_map["size"] / my_map["capacity"]
     return my_map
